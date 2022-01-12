@@ -85,42 +85,43 @@ export const getCurrentWalletConnected = async () => {
     };
   }
 };
+export const mintNFT = async(url, name, description) => {
 
-export const mintNFT = async (url, name, description) => {
-    // error handling
-    if(url.trim() == "" || (name.trim() == "" || description.trim() == "")) {
+    //error handling
+    if (url.trim() == "" || (name.trim() == "" || description.trim() == "")) { 
         return {
             success: false,
             status: "❗Please make sure all fields are completed before minting.",
         }
     }
 
-    // make metadata
+    //make metadata
     const metadata = new Object();
     metadata.name = name;
     metadata.image = url;
     metadata.description = description;
 
-    // make pinata call
+    //pinata pin request
     const pinataResponse = await pinJSONToIPFS(metadata);
-    if(!pinataResponse.success) {
+    if (!pinataResponse.success) {
         return {
             success: false,
-            status: "😢 Something went wrong while uploading your tokenURI."
+            status: "😢 Something went wrong while uploading your tokenURI.",
         }
-    }
-    const tokenURI = pinataResponse.pinataUrl;
+    } 
+    const tokenURI = pinataResponse.pinataUrl;  
 
-    window.contract = await new web3.eth.Contact(contractABI, contractAddress);
+    //load smart contract
+    window.contract = await new web3.eth.Contract(contractABI, contractAddress);//loadContract();
 
     //set up your Ethereum transaction
     const transactionParameters = {
         to: contractAddress, // Required except during contract publications.
         from: window.ethereum.selectedAddress, // must match user's active address.
-        'data': window.contract.methods.mintNFT(window.ethereum.selectedAddress, tokenURI).encodeABI()//make call to NFT smart contract
+        'data': window.contract.methods.mintNFT(window.ethereum.selectedAddress, tokenURI).encodeABI() //make call to NFT smart contract 
     };
 
-    //sign the transaction via Metamask
+    //sign transaction via Metamask
     try {
         const txHash = await window.ethereum
             .request({
@@ -137,5 +138,4 @@ export const mintNFT = async (url, name, description) => {
             status: "😥 Something went wrong: " + error.message
         }
     }
-
-};
+}; 
